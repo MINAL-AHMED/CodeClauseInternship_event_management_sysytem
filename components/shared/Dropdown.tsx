@@ -18,8 +18,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  createCategory,
+  getAllCategories,
+} from "@/lib/actions/category.actions";
 import { ICategory } from "@/lib/database/models/category.model";
-import { startTransition, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { Input } from "../ui/input";
 
 type DropdownProps = {
@@ -31,7 +35,22 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
   const [categories, setCategories] = useState<ICategory[]>([]);
   const [newCategory, setNewCategory] = useState("");
 
-  const handleAddCategory = () => {};
+  const handleAddCategory = () => {
+    createCategory({
+      categoryName: newCategory.trim(),
+    }).then((category) => {
+      setCategories((prevState) => [...prevState, category]);
+    });
+  };
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const categoryList = await getAllCategories();
+
+      categoryList && setCategories(categoryList as ICategory[]);
+    };
+    getCategories();
+  }, []);
 
   return (
     <Select onValueChange={onChangeHandler} defaultValue={value}>
@@ -56,7 +75,7 @@ const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-white">
             <AlertDialogHeader>
-              <AlertDialogTitle>New Category</AlertDialogTitle>
+              <AlertDialogTitle>Add New Category</AlertDialogTitle>
               <AlertDialogDescription>
                 <Input
                   type="text"
